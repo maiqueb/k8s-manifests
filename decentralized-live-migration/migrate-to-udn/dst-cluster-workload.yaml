@@ -33,6 +33,8 @@ spec:
     metadata:
       labels:
         kubevirt.io/vm: vm-1
+      annotations:
+        network.kubevirt.io/addresses: '{ "evpn": ["192.170.1.3"] }'
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
