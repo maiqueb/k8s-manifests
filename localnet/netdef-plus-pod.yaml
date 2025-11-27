@@ -1,0 +1,33 @@
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: localnet-network
+  namespace: default
+spec:
+  config: |2
+    {
+            "cniVersion": "1.0.0",
+            "name": "tenantblack",
+            "type": "ovn-k8s-cni-overlay",
+            "topology":"localnet",
+            "subnets": "202.10.130.112/28",
+            "vlanID": 33,
+            "mtu": 1500,
+            "netAttachDefName": "default/localnet-network"
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    k8s.v1.cni.cncf.io/networks: localnet-network
+  name: tinypod
+  namespace: default
+spec:
+  containers:
+  - args:
+    - pause
+    image: registry.k8s.io/e2e-test-images/agnhost:2.36
+    imagePullPolicy: IfNotPresent
+    name: agnhost-container
