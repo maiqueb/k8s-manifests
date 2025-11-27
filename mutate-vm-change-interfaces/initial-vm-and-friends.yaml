@@ -1,0 +1,109 @@
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: default
+  namespace: ovn-kubernetes
+spec:
+  config: |2
+    {
+      "cniVersion": "0.4.0",
+      "name": "ovn-kubernetes",
+      "type": "ovn-k8s-cni-overlay"
+    }
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: blue
+  labels:
+    name: blue
+    k8s.ovn.org/primary-user-defined-network: ""
+---
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: db-network
+  namespace: blue
+spec:
+  topology: Layer2
+  layer2:
+    role: Primary
+    mtu: 1400
+    ipam:
+      lifecycle: Persistent
+    subnets:
+      - 192.170.1.0/24
+---
+apiVersion: k8s.ovn.org/v1
+kind: ClusterUserDefinedNetwork
+metadata:
+  name: evpn
+spec:
+  namespaceSelector:
+    matchExpressions:
+    - key: kubernetes.io/metadata.name
+      operator: In
+      values:
+        - blue
+  network:
+    topology: Localnet
+    localnet:
+      role: Secondary
+      ipam:
+        mode: Disabled
+      physicalNetworkName: physnet
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-1
+  namespace: blue
+spec:
+  runStrategy: Always
+  template:
+    metadata:
+      namespace: blue
+      labels:
+        kubevirt.io/vm: vm-1
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      domain:
+        devices:
+          interfaces:
+          - name: evpn
+            macAddress: 02:03:04:05:06:07
+            bridge: {}
+          disks:
+          - disk:
+              bus: virtio
+            name: containerdisk
+          - disk:
+              bus: virtio
+            name: cloudinitdisk
+        resources:
+          requests:
+            memory: 2048M
+        machine:
+          type: ""
+      networks:
+      - multus:
+          networkName: evpn
+        name: evpn        
+      terminationGracePeriodSeconds: 0
+      volumes:
+      - containerDisk:
+          image: quay.io/kubevirt/fedora-with-test-tooling-container-disk:v1.6.2
+        name: containerdisk
+      - cloudInitNoCloud:
+          networkData: |
+            version: 2
+            ethernets:
+              eth0:
+                addresses:
+                - 192.170.1.3/24
+                gateway4: 192.170.1.1
+        name: cloudinitdisk
