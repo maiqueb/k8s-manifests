@@ -1,0 +1,11 @@
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: db-network
+spec:
+  topology: Layer2
+  layer2:
+    role: Secondary
+    mtu: 1400
+    ipam:
+      mode: Disabled 

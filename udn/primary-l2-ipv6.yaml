@@ -1,0 +1,13 @@
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: db-network
+spec:
+  topology: Layer2
+  layer2:
+    role: Primary
+    mtu: 1000
+    ipam: 
+      lifecycle: Persistent
+    subnets:
+      - fd10:1234::0/64
