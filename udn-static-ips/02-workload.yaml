@@ -1,0 +1,48 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-server
+  namespace: blue
+spec:
+  runStrategy: Always
+  template:
+    metadata:
+      annotations:
+        network.kubevirt.io/addresses: '{
+          "default": ["192.168.200.24"]
+      }'
+    spec:
+      domain:
+        devices:
+          disks:
+            - name: containerdisk
+              disk:
+                bus: virtio
+            - name: cloudinitdisk
+              disk:
+                bus: virtio
+          interfaces:
+          - name: default
+            macAddress: 02:03:04:05:06:07
+            binding:
+              name: l2bridge
+        machine:
+          type: ""
+        resources:
+          requests:
+            memory: 2048M
+      networks:
+      - name: default
+        pod: {}
+      terminationGracePeriodSeconds: 0
+      volumes:
+        - name: containerdisk
+          containerDisk:
+            image: quay.io/kubevirt/fedora-with-test-tooling-container-disk:v1.5.0
+        - name: cloudinitdisk
+          cloudInitNoCloud:
+            userData: |-
+              #cloud-config
+              password: fedora
+              chpasswd: { expire: False }
+

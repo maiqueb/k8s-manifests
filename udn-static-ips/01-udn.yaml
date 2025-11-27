@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: blue
+  labels:
+    name: blue
+    k8s.ovn.org/primary-user-defined-network: ""
+---
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: db-network
+  namespace: blue
+spec:
+  topology: Layer2
+  layer2:
+    role: Primary
+    mtu: 1400
+    ipam: 
+      lifecycle: Persistent
+    subnets:
+      - 192.168.200.0/24
