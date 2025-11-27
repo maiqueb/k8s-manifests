@@ -1,0 +1,12 @@
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: default 
+  namespace: ovn-kubernetes
+spec:
+  config: |2
+    {
+      "cniVersion": "0.4.0",
+      "name": "ovn-kubernetes",
+      "type": "ovn-k8s-cni-overlay"
+    }

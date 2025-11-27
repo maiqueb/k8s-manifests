@@ -1,0 +1,11 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachineInstanceMigration
+metadata:
+  name: vmim-source
+  namespace: default
+spec:
+  sendTo:
+    connectURL: "10.244.0.12:9185"
+    migrationID: abcdef
+  vmiName: vm-1
+
