@@ -1,0 +1,49 @@
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachineInstance
+metadata:
+  labels:
+    special: blue-vmi
+  name: blue-vmi
+  namespace: blue
+spec:
+  domain:
+    devices:
+      disks:
+      - disk:
+          bus: virtio
+        name: containerdisk
+      - disk:
+          bus: virtio
+        name: cloudinitdisk
+      interfaces:
+      - name: direct-routed-ingress
+        binding:
+          name: l2bridge
+      rng: {}
+    memory:
+      guest: 1024M
+    resources: {}
+  networks:
+  - name: direct-routed-ingress
+    pod: {}
+  terminationGracePeriodSeconds: 0
+  volumes:
+  - containerDisk:
+      image: quay.io/kubevirt/fedora-with-test-tooling-container-disk:v1.6.2
+    name: containerdisk
+  - cloudInitNoCloud:
+      networkData: |
+        version: 2
+        ethernets:
+          eth0:
+            dhcp4: true
+      userData: |-
+        #cloud-config
+        password: fedora
+        chpasswd: { expire: False }
+        packages:
+          - nginx
+        runcmd:
+          - [ "systemctl", "enable", "--now", "nginx" ]
+    name: cloudinitdisk

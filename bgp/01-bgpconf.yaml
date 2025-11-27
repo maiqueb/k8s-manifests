@@ -1,0 +1,17 @@
+apiVersion: frrk8s.metallb.io/v1beta1
+kind: FRRConfiguration
+metadata:
+  name: receive-filtered-blue-cudn
+  namespace: frr-k8s-system
+spec:
+  bgp:
+    routers:
+    - asn: 64512
+      neighbors:
+      - address: 172.18.0.5
+        asn: 64512
+        disableMP: true
+        toReceive:
+          allowed:
+            mode: all
+
