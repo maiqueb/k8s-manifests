@@ -9,6 +9,8 @@ spec:
   template:
     metadata:
       namespace: blue
+      annotations:
+        network.kubevirt.io/addresses: '{ "evpn": ["192.170.1.3"] }'
       labels:
         kubevirt.io/vm: vm-1
     spec:
